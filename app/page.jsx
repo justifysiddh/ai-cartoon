@@ -3,28 +3,6 @@ import React, { useState } from "react";
 
 export default function Page() {
   const [preview, setPreview] = useState(null);
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const cartoonAPI = async (style) => {
-    setLoading(true);
-    setResult(null);
-
-    const formData = new FormData();
-    formData.append("image", preview);
-
-    const res = await fetch(
-      `https://cartoonify-api.vercel.app/${style}`,
-      {
-        method: "POST",
-        body: formData
-      }
-    );
-
-    const data = await res.json();
-    setResult(data.output);
-    setLoading(false);
-  };
 
   return (
     <div style={{
@@ -46,51 +24,40 @@ export default function Page() {
         border:"1px solid rgba(255,255,255,0.2)"
       }}>
         <h1 style={{fontSize:"25px",fontWeight:"bold"}}>
-          🎨 AI Cartoon Maker
+          🎨 AI Cartoon Maker (Offline)
         </h1>
 
         <input
           type="file"
           accept="image/*"
-          onChange={(e)=>setPreview(e.target.files[0])}
+          onChange={(e)=>setPreview(URL.createObjectURL(e.target.files[0]))}
           style={{margin:"10px 0"}}
         />
 
         {preview && (
-          <img
-            src={URL.createObjectURL(preview)}
-            style={{width:"100%",borderRadius:"15px"}}
-          />
-        )}
-
-        {preview && (
-          <div style={{marginTop:"15px", display:"grid", gap:"8px"}}>
-            <button onClick={()=>cartoonAPI("pixar")}>🎬 Pixar 3D</button>
-            <button onClick={()=>cartoonAPI("anime")}>🌸 Anime</button>
-            <button onClick={()=>cartoonAPI("toon")}>😎 ToonMe</button>
-            <button onClick={()=>cartoonAPI("disney")}>🏰 Disney</button>
-          </div>
-        )}
-
-        {loading && (
-          <p style={{marginTop:"15px", fontSize:"18px"}}>
-            ⏳ Making Cartoon...
-          </p>
-        )}
-
-        {result && (
           <>
             <img
-              src={result}
-              style={{width:"100%",marginTop:"15px",borderRadius:"15px"}}
+              src={preview}
+              style={{
+                width:"100%",
+                borderRadius:"15px",
+                filter:"contrast(140%) saturate(130%) brightness(110%)",
+              }}
             />
-            <a
-              href={result}
-              download
-              style={{display:"block",marginTop:"10px",color:"yellow"}}
-            >
-              ⬇ Download
-            </a>
+
+            <img
+              src={preview}
+              style={{
+                width:"100%",
+                borderRadius:"15px",
+                marginTop:"15px",
+                filter:"contrast(180%) saturate(200%) brightness(110%) sepia(30%) blur(1px)",
+              }}
+            />
+
+            <p style={{marginTop:"10px",color:"yellow"}}>
+              ✅ Cartoon Generated (No API Needed)
+            </p>
           </>
         )}
       </div>
