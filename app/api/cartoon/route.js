@@ -1,42 +1,40 @@
 // app/api/cartoon/route.js
 import { NextResponse } from "next/server";
 
-export const runtime = "edge"; // fast, optional
+export const runtime = "edge"; // fast
 
+// map style name -> HuggingFace model (change if you prefer other models)
 const MODEL_MAP = {
-  "pixar": "deepinsight/Toonify",           // example - 3D / toonify style
-  "anime": "hakurei/waifu-diffusion",      // anime style (if available)
-  "toonme": "deepinsight/Toonify",         // fallback to toonify for toonme style
-  "disney": "nitrosocke/CartoonGAN"        // example cartoon-style model
+  pixar: "deepinsight/Toonify",      // example
+  anime: "hakurei/waifu-diffusion", // example (may need JSON format)
+  toon: "deepinsight/Toonify",      // fallback
+  disney: "nitrosocke/CartoonGAN"   // example
 };
 
 export async function POST(req) {
   try {
     const form = await req.formData();
     const file = form.get("image");
-    const style = form.get("style") || "pixar";
+    const style = (form.get("style") || "pixar").toString();
 
-    if (!file) {
-      return NextResponse.json({ error: "No image provided" }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
-    // convert file to Blob and then to ArrayBuffer
+    // convert file to arrayBuffer
     const arrayBuffer = await file.arrayBuffer();
     const body = new Uint8Array(arrayBuffer);
 
     // pick model endpoint
     const model = MODEL_MAP[style] || MODEL_MAP["pixar"];
-    // Hugging Face Inference API endpoint
     const url = `https://api-inference.huggingface.co/models/${model}`;
 
-    // HF API Key from env (set in Vercel dashboard)
     const HF_KEY = process.env.HF_API_KEY || "";
 
+    // Some HF models expect image binary directly (multipart). If JSON required, you'll need to adapt.
     const res = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: HF_KEY ? `Bearer ${HF_KEY}` : "",
-        // Accept: "image/png" // optional
+        // NOTE: do not set Content-Type here for binary body
       },
       body
     });
@@ -46,7 +44,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Model error", detail: text }, { status: 502 });
     }
 
-    // return image stream back to client
     const buffer = await res.arrayBuffer();
     return new Response(buffer, {
       status: 200,
