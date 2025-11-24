@@ -13,9 +13,8 @@ export default function Page() {
     const formData = new FormData();
     formData.append("image", preview);
 
-    // FREE AI API (no key needed)
     const res = await fetch(
-      `https://api.imgbbcartoon.workers.dev/${style}`,
+      `https://cartoonify-api.vercel.app/${style}`,
       {
         method: "POST",
         body: formData
@@ -65,7 +64,7 @@ export default function Page() {
         )}
 
         {preview && (
-          <div style={{marginTop:"15px"}}>
+          <div style={{marginTop:"15px", display:"grid", gap:"8px"}}>
             <button onClick={()=>cartoonAPI("pixar")}>🎬 Pixar 3D</button>
             <button onClick={()=>cartoonAPI("anime")}>🌸 Anime</button>
             <button onClick={()=>cartoonAPI("toon")}>😎 ToonMe</button>
@@ -74,7 +73,9 @@ export default function Page() {
         )}
 
         {loading && (
-          <p style={{marginTop:"15px"}}>⏳ Making Cartoon...</p>
+          <p style={{marginTop:"15px", fontSize:"18px"}}>
+            ⏳ Making Cartoon...
+          </p>
         )}
 
         {result && (
