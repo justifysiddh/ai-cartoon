@@ -1,27 +1,20 @@
 export async function POST(req) {
-  try {
-    const form = await req.formData();
-    const image = form.get("image");
+  const form = await req.formData();
+  const image = form.get("image");
 
-    const upstream = await fetch("https://ai-api.magicstudio.com/api/v1/cartoonize", {
+  const upstream = await fetch(
+    "https://api-inference.huggingface.co/models/bes-dev/AnimeGANv2",
+    {
       method: "POST",
       headers: {
-        "accept": "application/json"
+        "Authorization": "Bearer hf_dVJjvlfbnAqweLeFreePublic"
       },
-      body: form
-    });
+      body: image
+    }
+  );
 
-    const json = await upstream.json();
-
-    return new Response(
-      JSON.stringify({ output_url: json.output_url }),
-      { headers: { "Content-Type": "application/json" } }
-    );
-
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+  const buffer = await upstream.arrayBuffer();
+  return new Response(buffer, {
+    headers: { "Content-Type": "image/png" }
+  });
 }
